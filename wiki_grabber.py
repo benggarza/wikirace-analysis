@@ -17,22 +17,24 @@ files_li = soup.find_all('li', {'class':'file'})
 
 adjacency_df = pd.DataFrame(columns=['title','adjacency_list'])
 
+dump_urls = []
+
 # the files we are interested match 'pages-articles\d+'
 for elem in files_li:
   link_elem = elem.find('a')
   assert(link_elem.has_attr('href'))
   link = link_elem.get('href')
   link_name = link_elem.string
-  if re.search(r'pages-articles\d+.xml', link_name) is None:
-    print(f'skipping {link_name}')
-    continue
-  print(f'Downloading and parsing {link}')
+  if re.search(r'pages-articles\d+.xml', link_name) is not None:
+    dump_urls.append((link, link_name))
+    
+for num, (link, link_name) in enumerate(dump_urls):
+  print(f'{(num+1)/len(dump_urls):2.2%}: Downloading and parsing {link}')
   # we have found a file that we want
   r = requests.get(link)
   # save the data in file of same name
   open(link_name, 'w').write(r.content)
 
-  # TODO: implement the WikiXmlHandler class
   handler = WikiXmlHandler()
 
   parser = xml.sax.make_parser()
