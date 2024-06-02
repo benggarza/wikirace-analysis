@@ -36,9 +36,6 @@ for num, file_name in enumerate(dump_files):
   r = requests.get(dump_url + file_name)
   # save the data in file of same name
   open(file_name, 'wb').write(r.content)
-
-  
-
   
   parser.setContentHandler(handler)
   # read the bz2 file
@@ -85,6 +82,7 @@ for num, file_name in enumerate(dump_files):
     adjacency_df.loc[page_index, 'adjacency_list'] = page_adjacency
   # once we are finished reading the file, delete it to save space
   os.remove(file_name)
+  handler.reset()
 
 adjacency_df.to_feather('wiki-adjacency.feather')
           
