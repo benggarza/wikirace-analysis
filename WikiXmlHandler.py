@@ -22,3 +22,9 @@ class WikiXmlHandler(xml.sax.handler.ContentHandler):
       self._values[name] = ' '.join(self._buffer)
     if name == 'page':
       self._page = (self._values['title'], self._values['text'])
+
+  def reset(self):
+    self._buffer = None
+    self._values = {}
+    self._current_tag = None
+    self._page = None
