@@ -24,6 +24,7 @@ for elem in files_li:
   link_name = link_elem.string
   if re.search(r'pages-articles\d+.xml', link_name) is None:
     continue
+  print(f'Downloading and parsing {link}')
   # we have found a file that we want
   r = requests.get(link)
   # save the data in file of same name
@@ -43,9 +44,8 @@ for elem in files_li:
     # we have fully parsed a page
     title = handler.page[0]
     article = handler.page[1]
+    print(f'Parsed {title}')
     # TODO: get index of title from ref table (creating the row if needed), and initialize adjacency dictionary with table index
-    ref_idx = -1
-
     page_Index = adjacency_df.index[adjacency_df['title'] == title]
     page_index = -1
     if len(page_Index) == 0:
@@ -59,6 +59,7 @@ for elem in files_li:
     
     wiki = mwparserfromhell.parse(article)
     wikilinks = [x.title for x in wiki.filter_wikilinks()]
+    print(f'Page has {len(wikilinks) links')
     for wikilink in wikilinks:
       # don't consider node-to-itself edges, this will help with searching later
       if wikilink == title:
