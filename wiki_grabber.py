@@ -38,10 +38,10 @@ for elem in files_li:
 for num, file_name in enumerate(dump_files):
   print(f'{(num+1)/len(dump_files):2.2%}: Downloading and parsing {file_name}')
   # we have found a file that we want
-  #r = requests.get(dump_url + file_name)
+  r = requests.get(dump_url + file_name)
   # save the data in file of same name
   print("saving to file...")
-  #open(file_name, 'wb').write(r.content)
+  open(file_name, 'wb').write(r.content)
   
   print('parsing file...')
   parser.setContentHandler(handler)
