@@ -24,6 +24,7 @@ for elem in files_li:
   link = link_elem.get('href')
   link_name = link_elem.string
   if re.search(r'pages-articles\d+.xml', link_name) is None:
+    print(f'skipping {link_name}')
     continue
   print(f'Downloading and parsing {link}')
   # we have found a file that we want
