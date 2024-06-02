@@ -29,11 +29,11 @@ for elem in files_li:
   assert(link_elem.has_attr('href'))
   file_name = link_elem.string
   
-  #if re.search(r'pages-articles\d+.xml', file_name) is not None:
-  if re.search(r'pages-articles17.xml', file_name) is not None:
+  if re.search(r'pages-articles\d+.xml', file_name) is not None:
+  #if re.search(r'pages-articles17.xml', file_name) is not None:
     dump_files.append(file_name)
   # this is just here so we can test on the 40mb file
-  dump_files.reverse()
+  #dump_files.reverse()
     
 for num, file_name in enumerate(dump_files):
   print(f'{(num+1)/len(dump_files):2.2%}: Downloading and parsing {file_name}')
@@ -75,7 +75,7 @@ for num, file_name in enumerate(dump_files):
     
     wiki = mwparserfromhell.parse(article)
     wikilinks = [x.title for x in wiki.filter_wikilinks()]
-    print(f'Page has {len(wikilinks)} links')
+    #print(f'Page has {len(wikilinks)} links')
     for wikilink in wikilinks:
       # don't consider node-to-itself edges, this will help with searching later
       if wikilink == title:
@@ -94,9 +94,9 @@ for num, file_name in enumerate(dump_files):
       if wikilink_index not in page_adjacency:
         page_adjacency.append(wikilink_index)
     handler.reset()
-    print(f"Index sanity check - {title} has links to: ")
-    for descendent in page_adjacency:
-      print(f"{descendent}: {adjacency_df.loc[descendent, 'title']}")
+    #print(f"Index sanity check - {title} has links to: ")
+    #for descendent in page_adjacency:
+    #  print(f"{descendent}: {adjacency_df.loc[descendent, 'title']}")
     adjacency_df.loc[page_index, 'adjacency_list'] = page_adjacency
   # once we are finished reading the file, delete it to save space
   os.remove(file_name)
