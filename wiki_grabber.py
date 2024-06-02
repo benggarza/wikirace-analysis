@@ -5,6 +5,7 @@ import requests
 import mwparserfromhell
 import pandas as pd
 import os
+from WikiXmlHandler import WikiXmlHandler
 
 wiki_url = 'https://dumps.wikimedia.org/enwiki/'
 
