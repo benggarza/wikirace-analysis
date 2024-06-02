@@ -60,7 +60,7 @@ for elem in files_li:
     
     wiki = mwparserfromhell.parse(article)
     wikilinks = [x.title for x in wiki.filter_wikilinks()]
-    print(f'Page has {len(wikilinks) links')
+    print(f'Page has {len(wikilinks)} links')
     for wikilink in wikilinks:
       # don't consider node-to-itself edges, this will help with searching later
       if wikilink == title:
