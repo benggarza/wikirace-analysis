@@ -91,7 +91,8 @@ for num, file_name in enumerate(dump_files):
       wikilink_index = wikilink_Index.to_list()[0]
       assert(wikilink_index != -1)
 
-      page_adjacency.append(wikilink_index)
+      if wikilink_index not in page_adjacency:
+        page_adjacency.append(wikilink_index)
     handler.reset()
     print(f"Index sanity check - {title} has links to: ")
     for descendent in page_adjacency:
