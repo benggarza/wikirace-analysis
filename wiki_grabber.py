@@ -29,7 +29,7 @@ for elem in files_li:
     dump_urls.append((link, link_name))
     
 for num, (link, link_name) in enumerate(dump_urls):
-  print(f'{(num+1)/len(dump_urls):2.2%}: Downloading and parsing {link}')
+  print(f'{(num+1)/len(dump_urls):2.2%}: Downloading and parsing {link}: {link_name}')
   # we have found a file that we want
   r = requests.get(link)
   # save the data in file of same name
