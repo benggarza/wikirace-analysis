@@ -7,6 +7,7 @@ import pandas as pd
 import os
 from WikiXmlHandler import WikiXmlHandler
 import xml.sax
+import subprocess
 
 wiki_url = 'https://dumps.wikimedia.org/enwiki/'
 
@@ -35,11 +36,13 @@ for num, file_name in enumerate(dump_files):
   # we have found a file that we want
   r = requests.get(dump_url + file_name)
   # save the data in file of same name
-  open(file_name, 'wb').write(r.content)
+  #open(file_name, 'wb').write(r.content)
   
   parser.setContentHandler(handler)
   # read the bz2 file
-  for line in subprocess.Popen(['bzcat'], stdin=open(file_name), stdout=subprocess.PIPE).stdout:
+  p = subprocess.Popen(['bzcat'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+  p.communicate(input=r.content)
+  for line in p.stdout:
     parser.feed(line)
     # wait until we have fully parsed a page
     if handler.page is None:
@@ -81,7 +84,7 @@ for num, file_name in enumerate(dump_files):
       page_adjacency.append(wikilink_index)
     adjacency_df.loc[page_index, 'adjacency_list'] = page_adjacency
   # once we are finished reading the file, delete it to save space
-  os.remove(file_name)
+  #os.remove(file_name)
   handler.reset()
 
 adjacency_df.to_feather('wiki-adjacency.feather')
