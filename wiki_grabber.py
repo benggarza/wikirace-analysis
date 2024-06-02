@@ -13,7 +13,7 @@ dump_page = '20240501/'
 dump_url = wiki_url + dump_page
 
 soup = BeautifulSoup(requests.get(dump_url).text, 'html.parser')
-files_li = soup.find_all('li', {'class':'file'})[:3]
+files_li = soup.find_all('li', {'class':'file'})
 
 adjacency_df = pd.DataFrame(columns=['title','adjacency_list'])
 
