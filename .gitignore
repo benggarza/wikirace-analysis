@@ -1,0 +1,4 @@
+*.png
+*.feather
+__pycache__
+__pycache__/*
