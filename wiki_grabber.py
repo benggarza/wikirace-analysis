@@ -32,14 +32,14 @@ for num, file_name in enumerate(dump_files):
   # we have found a file that we want
   r = requests.get(dump_url + file_name)
   # save the data in file of same name
-  open(link_name, 'w').write(r.content)
+  open(file_name, 'w').write(r.content)
 
   handler = WikiXmlHandler()
 
   parser = xml.sax.make_parser()
   parser.setContentHandler(handler)
   # read the bz2 file
-  for line in subprocess.Popen(['bzcat'], stdin=open(link_name), stdout=subprocess.PIPE).stdout:
+  for line in subprocess.Popen(['bzcat'], stdin=open(file_name), stdout=subprocess.PIPE).stdout:
     parser.feed(line)
     # wait until we have fully parsed a page
     if handler.page is None:
@@ -81,7 +81,7 @@ for num, file_name in enumerate(dump_files):
       page_adjacency.append(wikilink_index)
     adjacency_df.loc[page_index, 'adjacency_list'] = page_adjacency
   # once we are finished reading the file, delete it to save space
-  os.remove(link_name)
+  os.remove(file_name)
 
 adjacency_df.to_feather('wiki-adjacency.feather')
           
