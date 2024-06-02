@@ -17,21 +17,20 @@ files_li = soup.find_all('li', {'class':'file'})
 
 adjacency_df = pd.DataFrame(columns=['title','adjacency_list'])
 
-dump_urls = []
+dump_files = []
 
 # the files we are interested match 'pages-articles\d+'
 for elem in files_li:
   link_elem = elem.find('a')
   assert(link_elem.has_attr('href'))
-  link = link_elem.get('href')
-  link_name = link_elem.string
-  if re.search(r'pages-articles\d+.xml', link_name) is not None:
-    dump_urls.append((link, link_name))
+  file_name = link_elem.string
+  if re.search(r'pages-articles\d+.xml', file_name) is not None:
+    dump_files.append(file_name)
     
-for num, (link, link_name) in enumerate(dump_urls):
-  print(f'{(num+1)/len(dump_urls):2.2%}: Downloading and parsing {link}: {link_name}')
+for num, file_name in enumerate(dump_files):
+  print(f'{(num+1)/len(dump_files):2.2%}: Downloading and parsing {file_name}')
   # we have found a file that we want
-  r = requests.get(link)
+  r = requests.get(dump_url + file_name)
   # save the data in file of same name
   open(link_name, 'w').write(r.content)
 
