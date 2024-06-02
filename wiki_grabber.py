@@ -6,6 +6,7 @@ import mwparserfromhell
 import pandas as pd
 import os
 from WikiXmlHandler import WikiXmlHandler
+import xml.sax
 
 wiki_url = 'https://dumps.wikimedia.org/enwiki/'
 
@@ -19,6 +20,8 @@ adjacency_df = pd.DataFrame(columns=['title','adjacency_list'])
 
 dump_files = []
 
+handler = WikiXmlHandler()
+parser = xml.sax.make_parser()
 # the files we are interested match 'pages-articles\d+'
 for elem in files_li:
   link_elem = elem.find('a')
@@ -32,11 +35,11 @@ for num, file_name in enumerate(dump_files):
   # we have found a file that we want
   r = requests.get(dump_url + file_name)
   # save the data in file of same name
-  open(file_name, 'w').write(r.content)
+  open(file_name, 'wb').write(r.content)
 
-  handler = WikiXmlHandler()
+  
 
-  parser = xml.sax.make_parser()
+  
   parser.setContentHandler(handler)
   # read the bz2 file
   for line in subprocess.Popen(['bzcat'], stdin=open(file_name), stdout=subprocess.PIPE).stdout:
