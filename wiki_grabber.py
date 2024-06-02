@@ -41,8 +41,8 @@ for num, file_name in enumerate(dump_files):
   parser.setContentHandler(handler)
   # read the bz2 file
   p = subprocess.Popen(['bzcat'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-  p.communicate(input=r.content)
-  for line in p.stdout:
+  
+  for line in p.communicate(input=r.content)[0]:
     parser.feed(line)
     # wait until we have fully parsed a page
     if handler.page is None:
