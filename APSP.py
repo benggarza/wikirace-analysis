@@ -57,11 +57,11 @@ def plot_shortest_path_count(path_dist, num_sample = 10000):
     else:
         path_distribution_df = pd.read_feather(f'path_count_dist-size{num_sample}.feather')
         path_distribution = path_distribution_df.set_index('shortest_path_count')['count'].to_dict()
-    print(path_distribution)
+    #print(path_distribution)
     plt.clf()
     plt.bar(x = path_distribution.keys(), height=path_distribution.values(),
             align='center')
-    plt.xticks(range(max(path_distribution.keys())+1))
+    #plt.xticks(range(max(path_distribution.keys())+1))
     plt.xlabel('Shortest Path Count')
     plt.ylabel('Node Count')
     plt.title('WikiRace: Shortest Path Count Distribution')
@@ -96,10 +96,10 @@ def APSP_statistics(graph, num_sample=None):
             try:
                 path = networkx.bidirectional_shortest_path(graph, s, t)
                 length = len(path)-1
-                print(f"Path {s} to {t}: {path}")
+                #print(f"Path {s} to {t}: {path}")
             # if there is no path, we will indicate that as length -1 in our data
             except networkx.NetworkXNoPath as nopath:
-                print(f"No path from {s} to {t}")
+                #print(f"No path from {s} to {t}")
                 length = -1
                 path = []
 
@@ -113,7 +113,7 @@ def APSP_statistics(graph, num_sample=None):
                 else:
                     node_visits[v] += 1
     
-    print(pd.Series(path_length_dist,name='count'))
+    #print(pd.Series(path_length_dist,name='count'))
 
     path_length_dist_df =pd.DataFrame( pd.Series(path_length_dist,name='count')).reset_index(names='path_length')
     path_length_dist_df.to_feather('pathlength_distribution.feather')
@@ -123,6 +123,7 @@ def APSP_statistics(graph, num_sample=None):
     node_visits_df.to_feather('nodevisits_counts.feather')
 
     # node visit counts
+    print('Node visits during shortest path search')
     print(node_visits_df.head())
 
 def plot_path_length_stats(pl_dist):
@@ -152,8 +153,9 @@ def main():
     # what do we want to do?
     # test run, low sample count
     APSP_statistics(wiki_graph, num_sample=100)
-
     shortest_path_count(wiki_graph, num_sample=100)
+    plot_path_length_stats(None)
+    plot_shortest_path_count(None, num_sample=100)
 
 def test():
     graph = networkx.from_dict_of_lists({0:[2,4,5],
@@ -168,5 +170,5 @@ def test():
     plot_shortest_path_count(None, num_sample=None)
 
 if __name__=="__main__":
-    test()
+    main()
 
