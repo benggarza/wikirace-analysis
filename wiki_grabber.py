@@ -57,10 +57,10 @@ for num, file_name in enumerate(dump_files):
   
   pages = []
   print('Reading')
-  #bar = tqdm(desc=file_name, total=len(p.stdout), unit='line', unit_scale=True, unit_divisor=1000,)
+  bar = tqdm(desc=file_name, total=len(p.stdout), unit='line', unit_scale=True, unit_divisor=1000,)
   for line in p.stdout:
     parser.feed(line)
-    #bar.update(1)
+    bar.update(1)
     # wait until we have fully parsed a page
     if handler._page is None:
       continue
