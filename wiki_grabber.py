@@ -24,8 +24,7 @@ adjacency_dict = {}
 
 dump_files = []
 
-handler = WikiXmlHandler()
-parser = xml.sax.make_parser()
+
 # the files we are interested match 'pages-articles\d+'
 for elem in files_li:
   link_elem = elem.find('a')
@@ -40,6 +39,8 @@ for elem in files_li:
     
 print(f"Found {len(dump_files)} to download")
 for num, file_name in enumerate(dump_files):
+  handler = WikiXmlHandler()
+  parser = xml.sax.make_parser()
   print(f'{(num+1)/len(dump_files):2.2%} {file_name}: Downloading')
   # we have found a file that we want
   r = requests.get(dump_url + file_name, stream=True)
@@ -70,7 +71,7 @@ for num, file_name in enumerate(dump_files):
     handler.reset()
 
   print(f'Parsing')
-  #bar = tqdm(desc=file_name, total=len(pages), unit='page', unit_scale=True, unit_divisor=1000,)
+  bar = tqdm(desc=file_name, total=len(pages), unit='page', unit_scale=True, unit_divisor=1000,)
   for i, (title, article) in enumerate(pages):
     if title in adjacency_dict:
       page_index = adjacency_dict[title]['index']
@@ -114,12 +115,12 @@ for num, file_name in enumerate(dump_files):
     #print(f"Final adjacency list looks like {list(page_adjacency.keys())}\n")
     page_entry = {'index': page_index, 'adjacency_list': list(page_adjacency.keys())}
     adjacency_dict[title] = page_entry
-    #bar.update(1)
-    if (i*10)%len(pages) == 0:
-      print('-',end='')
+    bar.update(1)
+    #if (i*10)%len(pages) == 0:
+    #  print('-',end='')
   print('Done')
 
-  #bar.close()
+  bar.close()
 
   # once we are finished reading the file, delete it to save space
   os.remove(file_name)

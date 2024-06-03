@@ -2,3 +2,4 @@
 *.feather
 __pycache__
 __pycache__/*
+*.bz2
