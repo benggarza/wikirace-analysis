@@ -69,6 +69,7 @@ for num, file_name in enumerate(dump_files):
     article = handler._page[1]
     pages.append((title,article))
     handler.reset()
+  bar.close()
 
   print(f'Parsing')
   bar = tqdm(desc=file_name, total=len(pages), unit='page', unit_scale=True, unit_divisor=1000,)
