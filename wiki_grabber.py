@@ -11,7 +11,6 @@ import xml.sax
 import subprocess
 from tqdm import tqdm
 import gc
-from memory_profiler import profile
 
 wiki_url = 'https://dumps.wikimedia.org/enwiki/'
 
