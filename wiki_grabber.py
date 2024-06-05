@@ -27,6 +27,14 @@ files_li = soup.find_all('li', {'class':'file'})
 def main():
   # {title -> index, ...}
   reference_dict = {}
+  try:
+    print(f"Looking for reference file...")
+    reference_df = pd.read_feather('reference.feather')
+    reference_dict = reference_df.set_index('title').to_dict('index')
+    print(reference_dict[list(reference_dict.keys())[0]])
+  except:
+    print("No reference found, making a new one")
+    pass
 
   dump_files = []
 
@@ -47,6 +55,9 @@ def main():
       
   print(f"Found {len(dump_files)} to download")
   for num, file_name in enumerate(dump_files):
+    if os.path.exists(file_name + '.feather'):
+      print(f'{file_name} already processed, moving on...')
+      continue
 
     # new adjacency dictionary
     # {index ->[adjacency_list], ...}
