@@ -75,6 +75,8 @@ def APSP_statistics(graph, num_sample=None):
         print("warning: num_sample is larger than the number of possible source-target pairs\nchoosing entire graph instead")
         num_sample = None
 
+    longest_paths = []
+    longest_path_length = 1
     path_length_dist = {}
     node_visits = {}
 
@@ -96,6 +98,11 @@ def APSP_statistics(graph, num_sample=None):
             try:
                 path = networkx.bidirectional_shortest_path(graph, s, t)
                 length = len(path)-1
+                if length > longest_path_length:
+                    longest_paths = []
+                    longest_path_length = length
+                if length == longest_path_length:
+                    longest_paths.append((s,t))
                 #print(f"Path {s} to {t}: {path}")
             # if there is no path, we will indicate that as length -1 in our data
             except networkx.NetworkXNoPath as nopath:
@@ -121,6 +128,13 @@ def APSP_statistics(graph, num_sample=None):
     node_visits_df = pd.DataFrame(pd.Series(node_visits, name='count')).reset_index(names='node_id')
     node_visits_df.sort_values(by='count', inplace=True,ignore_index=True)
     node_visits_df.to_feather('nodevisits_counts.feather')
+
+    with open('longest_paths.txt','w') as f:
+        f.write(f'Longest Path Length: {longest_path_length}\n')
+        for i, (s,t) in enumerate(longest_paths):
+            if i > 100:
+                break
+            f.write(f'{s} -> {t}\n')
 
     # node visit counts
     print('Node visits during shortest path search')
@@ -170,5 +184,5 @@ def test():
     plot_shortest_path_count(None, num_sample=None)
 
 if __name__=="__main__":
-    main()
+    test()
 
