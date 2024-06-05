@@ -31,6 +31,7 @@ def main():
     print(f"Looking for reference file...")
     reference_df = pd.read_feather('reference.feather')
     reference_dict = reference_df.set_index('title').to_dict('index')
+    print(list(reference_dict.keys())[0])
     print(reference_dict[list(reference_dict.keys())[0]])
   except:
     print("No reference found, making a new one")
