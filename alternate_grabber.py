@@ -42,7 +42,7 @@ def main():
     # parse the page file
     for line in io.BufferedReader(gzip.open(page_gz, 'r')):
         # we are only interested in the statements that dump the info to the db
-        line_str = line.decode('utf-8') .rstrip('\n')       
+        line_str = line.decode('utf-8').rstrip('\n')       
         if not re.search('^INSERT INTO', line_str):
             continue
         # line format: "INSERT INTO `page` VALUES ...;"
@@ -66,7 +66,7 @@ def main():
     # parse the redirect file
     for line in io.BufferedReader(gzip.open(redirect_gz, 'r')):
         # we are only interested in the statements that dump the info to the db
-        line_str = line.decode('utf-8') .rstrip('\n')       
+        line_str = line.decode('utf-8').rstrip('\n')       
         if not re.search('^INSERT INTO', line_str):
             continue
         # line format: "INSERT INTO `redirect` VALUES (from_id, namespace, '<to_title>','',''), ...);"
@@ -95,7 +95,7 @@ def main():
     # parse the pagelinks file
     for line in io.BufferedReader(gzip.open(pagelinks_gz, 'r')):
         # we are only interested in the statements that dump the info to the db
-        line_str = line.decode('utf-8') .rstrip('\n')       
+        line_str = line.decode('utf-8').rstrip('\n')       
         if not re.search('^INSERT INTO', line_str):
             continue
         # line format: "INSERT INTO `redirect` VALUES (from_id, namespace, '<to_title>','',''), ...);"
