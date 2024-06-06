@@ -51,20 +51,21 @@ def main():
         for i in range(2, len(list(values)), 2):
             try:
                 value_tuple = values[i][1]
-            except:
-                print(f"value_tuple likely not a tuple: {values[i]}")
-                continue
-            # only namespace 0 and not a redirect TODO: double check this logic??
-            # what if another page links to this redirect page?
-            if int(str(value_tuple[2])) != 0:# or int(value_tuple[8]) == 1:
-                continue
-            page_id = int(str(value_tuple[0]))
-            page_title = str(value_tuple[4])[1:-1]
-            print(f'{page_id}: {page_title}')
 
-            # Adding page to dictionary
-            id_reference[page_id] = page_title
-            title_reference[page_title] = page_id
+                # only namespace 0 and not a redirect TODO: double check this logic??
+                # what if another page links to this redirect page?
+                if int(str(value_tuple[2])) != 0:# or int(value_tuple[8]) == 1:
+                    continue
+                page_id = int(str(value_tuple[0]))
+                page_title = str(value_tuple[4])[1:-1]
+                print(f'{page_id}: {page_title}')
+
+                # Adding page to dictionary
+                id_reference[page_id] = page_title
+                title_reference[page_title] = page_id
+            except:
+                print(f"issues with value: {values}")
+                continue
 
 
     # parse the redirect file
@@ -84,21 +85,23 @@ def main():
             # value_tuple = [INTEGER; ,; NAMESPACE; ,; 'title'; ,; ''; ,; '']
             try:
                 value_tuple = values[i][1]
+            
+                # NAMESPACE should be 0
+                if int(str(value_tuple[2])) != 0:
+                    continue
+                from_id = int(str(value_tuple[0]))
+                # truncate the starting and ending quotes
+                to_title = str(value_tuple[4])[1:-1]
+
+                to_id = title_reference[to_title]
+
+                print(f'{from_id} >> {to_id}')
+                # Creating a table of redirects to use for adjacency list building
+                redirects[from_id] = to_id
+
             except:
-                print(f"value_tuple likely not a tuple: {values[i]}")
+                print(f"issues with value: {values}")
                 continue
-            # NAMESPACE should be 0
-            if int(str(value_tuple[2])) != 0:
-                continue
-            from_id = int(str(value_tuple[0]))
-            # truncate the starting and ending quotes
-            to_title = str(value_tuple[4])[1:-1]
-
-            to_id = title_reference[to_title]
-
-            print(f'{from_id} >> {to_id}')
-            # Creating a table of redirects to use for adjacency list building
-            redirects[from_id] = to_id
 
     # parse the pagelinks file
     for line in io.BufferedReader(gzip.open(pagelinks_gz, 'r')):
@@ -117,27 +120,29 @@ def main():
             # value_tuple = [INTEGER; ,; NAMESPACE; ,; 'title'; ,; ''; ,; '']
             try:
                 value_tuple = values[i][1]
+
+                # NAMESPACE should be 0
+                if int(str(value_tuple[2])) != 0:
+                    continue
+                from_id = int(str(value_tuple[0]))
+                # truncate the starting and ending quotes
+                to_title = str(value_tuple[4])[1:-1]
+                
+                to_id = title_reference[to_title]
+
+                # Redirects automatically move the user from the 'from' to the 'to'
+                # In terms of graphs, we just go directly to the last 'to'
+                while(to_id in redirects):
+                    to_id = redirects[to_id]
+
+                print(f'{from_id} -> {to_id}')
+                if from_id not in adjacency_list:
+                    adjacency_list[from_id] = []
+                adjacency_list[from_id].append(to_id)
+
             except:
-                print(f"value_tuple likely not a tuple: {values[i]}")
+                print(f"issues with value: {values}")
                 continue
-            # NAMESPACE should be 0
-            if int(str(value_tuple[2])) != 0:
-                continue
-            from_id = int(str(value_tuple[0]))
-            # truncate the starting and ending quotes
-            to_title = str(value_tuple[4])[1:-1]
-            
-            to_id = title_reference[to_title]
-
-            # Redirects automatically move the user from the 'from' to the 'to'
-            # In terms of graphs, we just go directly to the last 'to'
-            while(to_id in redirects):
-                to_id = redirects[to_id]
-
-            print(f'{from_id} -> {to_id}')
-            if from_id not in adjacency_list:
-                adjacency_list[from_id] = []
-            adjacency_list[from_id].append(to_id)
 
     adjacency_df = pd.DataFrame.from_dict(adjacency_list, orient='index').reset_index(names='idx')
     print(adjacency_df.info())
