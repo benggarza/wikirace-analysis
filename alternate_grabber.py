@@ -55,7 +55,7 @@ def main():
                     value_tuple = values[i][1]
                 except:
                     print(f"value_tuple likely not a tuple: {values[i]}")
-                    exit(1)
+                    continue
                 # only namespace 0 and not a redirect TODO: double check this logic??
                 # what if another page links to this redirect page?
                 if int(str(value_tuple[2])) != 0:# or int(value_tuple[8]) == 1:
@@ -86,7 +86,11 @@ def main():
             # from here, the tuples containing values are at indexes 2,4,6,8,...
             for i in range(2, len(list(values)), 2):
                 # value_tuple = [INTEGER; ,; NAMESPACE; ,; 'title'; ,; ''; ,; '']
-                value_tuple = values[i][1]
+                try:
+                    value_tuple = values[i][1]
+                except:
+                    print(f"value_tuple likely not a tuple: {values[i]}")
+                    continue
                 # NAMESPACE should be 0
                 if int(str(value_tuple[2])) != 0:
                     continue
@@ -117,7 +121,11 @@ def main():
             # from here, the tuples containing values are at indexes 2,4,6,8,...
             for i in range(2, len(list(values)), 2):
                 # value_tuple = [INTEGER; ,; NAMESPACE; ,; 'title'; ,; ''; ,; '']
-                value_tuple = values[i][1]
+                try:
+                    value_tuple = values[i][1]
+                except:
+                    print(f"value_tuple likely not a tuple: {values[i]}")
+                    continue
                 # NAMESPACE should be 0
                 if int(str(value_tuple[2])) != 0:
                     continue
