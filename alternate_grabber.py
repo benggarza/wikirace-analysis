@@ -49,7 +49,11 @@ def main():
         stmt = sqlparse.parse(line_str)[0]
         values = stmt[-2]
         for i in range(2, len(list(values)), 2):
-            value_tuple = values[i][1]
+            try:
+                value_tuple = values[i][1]
+            except:
+                print(f"value_tuple likely not a tuple: {values[i]}")
+                exit(1)
             # only namespace 0 and not a redirect TODO: double check this logic??
             # what if another page links to this redirect page?
             if int(str(value_tuple[2])) != 0:# or int(value_tuple[8]) == 1:
