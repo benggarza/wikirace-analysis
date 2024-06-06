@@ -40,110 +40,104 @@ def main():
     redirects = {}
 
     # parse the page file
-    with tqdm(desc=page_gz, total=os.path.getsize(page_gz), unit='B', unit_scale=True, unit_divisor=1024,) as bar:
-        for line in io.BufferedReader(gzip.open(page_gz, 'r')):
-            # we are only interested in the statements that dump the info to the db
-            bar.update(len(line))
-            line_str = line.decode('utf-8').rstrip('\n')       
-            if not re.search('^INSERT INTO', line_str):
+    for line in io.BufferedReader(gzip.open(page_gz, 'r')):
+        # we are only interested in the statements that dump the info to the db
+        line_str = line.decode('utf-8').rstrip('\n')       
+        if not re.search('^INSERT INTO', line_str):
+            continue
+        # line format: "INSERT INTO `page` VALUES ...;"
+        stmt = sqlparse.parse(line_str)[0]
+        values = stmt[-2]
+        for i in range(2, len(list(values)), 2):
+            try:
+                value_tuple = values[i][1]
+            except:
+                print(f"value_tuple likely not a tuple: {values[i]}")
                 continue
-            # line format: "INSERT INTO `page` VALUES ...;"
-            stmt = sqlparse.parse(line_str)[0]
-            values = stmt[-2]
-            for i in range(2, len(list(values)), 2):
-                try:
-                    value_tuple = values[i][1]
-                except:
-                    print(f"value_tuple likely not a tuple: {values[i]}")
-                    continue
-                # only namespace 0 and not a redirect TODO: double check this logic??
-                # what if another page links to this redirect page?
-                if int(str(value_tuple[2])) != 0:# or int(value_tuple[8]) == 1:
-                    continue
-                page_id = int(str(value_tuple[0]))
-                page_title = str(value_tuple[4])[1:-1]
-                #print(f'{page_id}: {page_title}')
+            # only namespace 0 and not a redirect TODO: double check this logic??
+            # what if another page links to this redirect page?
+            if int(str(value_tuple[2])) != 0:# or int(value_tuple[8]) == 1:
+                continue
+            page_id = int(str(value_tuple[0]))
+            page_title = str(value_tuple[4])[1:-1]
+            print(f'{page_id}: {page_title}')
 
-                # Adding page to dictionary
-                id_reference[page_id] = page_title
-                title_reference[page_title] = page_id
+            # Adding page to dictionary
+            id_reference[page_id] = page_title
+            title_reference[page_title] = page_id
 
 
     # parse the redirect file
-    with tqdm(desc=page_gz, total=os.path.getsize(page_gz), unit='B', unit_scale=True, unit_divisor=1024,) as bar:
-        for line in io.BufferedReader(gzip.open(redirect_gz, 'r')):
-            bar.update(len(line))
-            # we are only interested in the statements that dump the info to the db
-            line_str = line.decode('utf-8').rstrip('\n')       
-            if not re.search('^INSERT INTO', line_str):
+    for line in io.BufferedReader(gzip.open(redirect_gz, 'r')):
+        # we are only interested in the statements that dump the info to the db
+        line_str = line.decode('utf-8').rstrip('\n')       
+        if not re.search('^INSERT INTO', line_str):
+            continue
+        # line format: "INSERT INTO `redirect` VALUES (from_id, namespace, '<to_title>','',''), ...);"
+        stmt = sqlparse.parse(line_str)[0]
+
+        # Statement object: [INSERT, ' ', INTO, ' ', '`tablename`', ' ', VALUES, ' ', ]
+        # VALUES (),(),() are at index -2 - this is also a list of tokens
+        values = stmt[-2]
+        # from here, the tuples containing values are at indexes 2,4,6,8,...
+        for i in range(2, len(list(values)), 2):
+            # value_tuple = [INTEGER; ,; NAMESPACE; ,; 'title'; ,; ''; ,; '']
+            try:
+                value_tuple = values[i][1]
+            except:
+                print(f"value_tuple likely not a tuple: {values[i]}")
                 continue
-            # line format: "INSERT INTO `redirect` VALUES (from_id, namespace, '<to_title>','',''), ...);"
-            stmt = sqlparse.parse(line_str)[0]
+            # NAMESPACE should be 0
+            if int(str(value_tuple[2])) != 0:
+                continue
+            from_id = int(str(value_tuple[0]))
+            # truncate the starting and ending quotes
+            to_title = str(value_tuple[4])[1:-1]
 
-            # Statement object: [INSERT, ' ', INTO, ' ', '`tablename`', ' ', VALUES, ' ', ]
-            # VALUES (),(),() are at index -2 - this is also a list of tokens
-            values = stmt[-2]
-            # from here, the tuples containing values are at indexes 2,4,6,8,...
-            for i in range(2, len(list(values)), 2):
-                # value_tuple = [INTEGER; ,; NAMESPACE; ,; 'title'; ,; ''; ,; '']
-                try:
-                    value_tuple = values[i][1]
-                except:
-                    print(f"value_tuple likely not a tuple: {values[i]}")
-                    continue
-                # NAMESPACE should be 0
-                if int(str(value_tuple[2])) != 0:
-                    continue
-                from_id = int(str(value_tuple[0]))
-                # truncate the starting and ending quotes
-                to_title = str(value_tuple[4])[1:-1]
+            to_id = title_reference[to_title]
 
-                to_id = title_reference[to_title]
-
-                print(f'{from_id} >> {to_id}')
-                # Creating a table of redirects to use for adjacency list building
-                redirects[from_id] = to_id
+            print(f'{from_id} >> {to_id}')
+            # Creating a table of redirects to use for adjacency list building
+            redirects[from_id] = to_id
 
     # parse the pagelinks file
-    with tqdm(desc=page_gz, total=os.path.getsize(page_gz), unit='B', unit_scale=True, unit_divisor=1024,) as bar:
-        for line in io.BufferedReader(gzip.open(pagelinks_gz, 'r')):
-            bar.update(len(line))
-            # we are only interested in the statements that dump the info to the db
-            line_str = line.decode('utf-8').rstrip('\n')       
-            if not re.search('^INSERT INTO', line_str):
+    for line in io.BufferedReader(gzip.open(pagelinks_gz, 'r')):
+        # we are only interested in the statements that dump the info to the db
+        line_str = line.decode('utf-8').rstrip('\n')       
+        if not re.search('^INSERT INTO', line_str):
+            continue
+        # line format: "INSERT INTO `redirect` VALUES (from_id, namespace, '<to_title>','',''), ...);"
+        stmt = sqlparse.parse(line_str)[0]
+
+        # Statement object: [INSERT, ' ', INTO, ' ', '`tablename`', ' ', VALUES, ' ', ]
+        # VALUES (),(),() are at index -2 - this is also a list of tokens
+        values = stmt[-2]
+        # from here, the tuples containing values are at indexes 2,4,6,8,...
+        for i in range(2, len(list(values)), 2):
+            # value_tuple = [INTEGER; ,; NAMESPACE; ,; 'title'; ,; ''; ,; '']
+            try:
+                value_tuple = values[i][1]
+            except:
+                print(f"value_tuple likely not a tuple: {values[i]}")
                 continue
-            # line format: "INSERT INTO `redirect` VALUES (from_id, namespace, '<to_title>','',''), ...);"
-            stmt = sqlparse.parse(line_str)[0]
+            # NAMESPACE should be 0
+            if int(str(value_tuple[2])) != 0:
+                continue
+            from_id = int(str(value_tuple[0]))
+            # truncate the starting and ending quotes
+            to_title = str(value_tuple[4])[1:-1]
+            
+            to_id = title_reference[to_title]
 
-            # Statement object: [INSERT, ' ', INTO, ' ', '`tablename`', ' ', VALUES, ' ', ]
-            # VALUES (),(),() are at index -2 - this is also a list of tokens
-            values = stmt[-2]
-            # from here, the tuples containing values are at indexes 2,4,6,8,...
-            for i in range(2, len(list(values)), 2):
-                # value_tuple = [INTEGER; ,; NAMESPACE; ,; 'title'; ,; ''; ,; '']
-                try:
-                    value_tuple = values[i][1]
-                except:
-                    print(f"value_tuple likely not a tuple: {values[i]}")
-                    continue
-                # NAMESPACE should be 0
-                if int(str(value_tuple[2])) != 0:
-                    continue
-                from_id = int(str(value_tuple[0]))
-                # truncate the starting and ending quotes
-                to_title = str(value_tuple[4])[1:-1]
-                
-                to_id = title_reference[to_title]
+            # Redirects automatically move the user from the 'from' to the 'to'
+            # In terms of graphs, we just go directly to the last 'to'
+            while(to_id in redirects):
+                to_id = redirects[to_id]
 
-                # Redirects automatically move the user from the 'from' to the 'to'
-                # In terms of graphs, we just go directly to the last 'to'
-                while(to_id in redirects):
-                    to_id = redirects[to_id]
-
-                print(f'{from_id} -> {to_id}')
-                if from_id not in adjacency_list:
-                    adjacency_list[from_id] = []
-                adjacency_list[from_id].append(to_id)
+            print(f'{from_id} -> {to_id}')
+            if from_id not in adjacency_list:
+                adjacency_list[from_id] = []
+            adjacency_list[from_id].append(to_id)
 
     adjacency_df = pd.DataFrame.from_dict(adjacency_list, orient='index').reset_index(names='idx')
     print(adjacency_df.info())
