@@ -3,6 +3,7 @@ import networkx
 import matplotlib.pyplot as plt
 import random
 import math
+import sqlite3
 
 
 def _count_shortest_paths(graph : networkx.Graph, s : int, t : int, path : list, prev_paths : list[list], length : int):
@@ -156,12 +157,35 @@ def plot_path_length_stats(pl_dist):
     plt.plot()
     plt.savefig('pathlength_distribution_plot.png', format='png')
 
+def build_adjacency_list_from_db(db = 'sdow.sqlite'):
+    conn = sqlite3.connect(db)
+    cursor=conn.cursor()
+
+    edge_query = '''SELECT id, outgoing_links
+                    FROM links'''
+
+    # cursor now contains a list of tuples [(from_id, 'to_id|to_id|to_id|...'), ...]
+    cursor.execute(edge_query)
+
+    adjacency_dict = {}
+    for from_id, to_ids_str in cursor:
+        adj_list = []
+        for tid in to_ids_str.split('|'):
+            if tid:
+                adj_list.append(int(tid))
+        adjacency_dict[from_id] = adj_list
+
+    return adjacency_dict
+
+
+
 def main():
     # cols: index, title, adjacency_list
-    adjacency_df = pd.read_feather('wiki-adjacency.feather')
+    #adjacency_df = pd.read_feather('wiki-adjacency.feather')
 
     # {0: adjacency_list_0, 1: adjacency_list_1, ...}
-    adjacency_dict = adjacency_df['adjacency_list'].to_dict()
+    #adjacency_dict = adjacency_df['adjacency_list'].to_dict()
+    adjacency_dict = build_adjacency_list_from_db()
     wiki_graph = networkx.from_dict_of_lists(adjacency_dict)
 
     # what do we want to do?
